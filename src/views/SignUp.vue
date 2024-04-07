@@ -15,9 +15,8 @@
         </el-form-item>
 
         <el-form-item label="" size="normal">
-          <el-button type="primary" @click="login('loginForm')">登录</el-button>
+          <el-button type="primary" @click="signUp('loginForm')">注册</el-button>
           <el-button type="" @click="resetForm('loginForm')">清除</el-button>
-          <el-button type="" @click="signUp">注册</el-button>
         </el-form-item>
 
       </el-form>
@@ -56,30 +55,24 @@ export default {
     }
   },
   methods: {
-    // 注册
-    signUp() {
-      this.$router.push("/signUp")
-    },
     // 重置表单
     resetForm(formName) {
       //  this.$refs.loginForm.resetFields();
       this.$refs[formName].resetFields();
     },
-    login(formName) {
+    // 注册
+    signUp(formName) {
       this.$refs[formName].validate(async valid => {
         if (valid) {
           console.log("this.loginForm", this.loginForm);
-          // 调用登录接口
-          const { data: res } = await this.$http.post("user/Login", this.loginForm)
-          // 判断是否登陆成功
+          // 调用注册接口
+          const { data: res } = await this.$http.post("user/AddUser", this.loginForm)
+          // 判断是否注册成功
           if (res.state != 200) { return this.$message.error(res.message) }
-          // 登陆成功，保存token
-          window.sessionStorage.setItem("token", res.token)
-          window.sessionStorage.setItem('user_name', res.name)
-          window.sessionStorage.setItem('user_id', res.id)
+          // 注册成功
           this.$message({
             type: 'success',
-            message: "登陆成功"
+            message: "注册成功"
           })
           this.$router.push(this.url)
         } else {

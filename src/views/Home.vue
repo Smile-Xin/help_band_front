@@ -25,9 +25,9 @@ export default {
   components: { TopBar, Footer }
 }
 </script>
-<style>
+<style scoped>
 #bg{
-  background-image: url('../assets/cat.jpg');
+  /* background-image: url('../assets/cat.jpg'); */
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
