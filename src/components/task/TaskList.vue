@@ -80,7 +80,8 @@
           <div class="my-4 text-subtitle-1">BiliBili：{{ profile.bili }}</div>
           <div class="my-4 text-subtitle-1">Email：{{ profile.email }}</div>
         </v-card-text>
-        <el-button v-if="this.headers.user_id !== profile.ID" class="message-btn" color="primary" text @click="goToMessage()">私信</el-button>
+        <el-button v-if="this.headers.user_id !== profile.ID" class="message-btn" color="primary" text
+          @click="goToMessage()">私信</el-button>
       </v-card>
     </el-dialog>
 
@@ -97,7 +98,7 @@ export default {
       profile: {},
       // 个人信息弹出框
       profileDialog: false,
-      // user信息
+      // 信息框的user信息
       user: {},
       taskList: [],
       queryParam: {
@@ -109,6 +110,8 @@ export default {
         user_id: window.sessionStorage.getItem('user_id'),
         user_name: window.sessionStorage.getItem('user_name'),
       },
+      // letter
+      letter: {},
 
       count: 0,
       total: 0
@@ -123,7 +126,25 @@ export default {
     // 跳转到私信页面
     goToMessage() {
       if (this.headers.user_id === 0 || this.headers.user_id === null || this.headers.user_id === "undefined") return alert("请先登录")
-      this.$router.push(`/letter/chat/${this.user.ID}`)
+      this.AddLetter()
+      
+    },
+    // 添加私信
+    async AddLetter() {
+      this.letter.userA_id = parseInt(this.headers.user_id);
+      this.letter.userB_id = parseInt(this.user.ID);
+      const { data: res } = await this.$http.post(`letter/AddLetter`, this.letter)
+      console.log("add letter res", res)
+      this.getLetter()
+    },
+    async getLetter() { 
+      console.log("this.headers.user_id", this.headers.user_id)
+      console.log("this.user.ID", this.user.ID)
+      const { data: res } = await this.$http.get(`letter/QueryLetterByTwoUserId/${this.headers.user_id}/${this.user.ID}`)
+      console.log("get letter res", res)
+      this.letter = res.data
+      console.log("this.letter", this.letter)
+      this.$router.push(`/letter/chat/${this.letter.id}`)
     },
     // 关闭个人信息弹出框
     handleClose() {

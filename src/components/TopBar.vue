@@ -5,7 +5,7 @@
       <v-toolbar-title v-if="headers.user_name">
         <v-app-bar-nav-icon class="mx-15 hidden-md-and-down">
           <v-avatar size="40" color="grey">
-            <img  :src="avatar"  alt />
+            <img :src="avatar" alt />
           </v-avatar>
         </v-app-bar-nav-icon>
       </v-toolbar-title>
@@ -16,7 +16,7 @@
         <v-tab v-if="headers.user_name" to="/task/publishedTask">发布的任务</v-tab>
         <v-tab v-if="headers.user_name" to="/task/acceptedTask">接受的任务</v-tab>
         <v-tab v-if="headers.user_name" to="/community">社区</v-tab>
-        <v-tab v-if="headers.user_name" :to="`/letter`">私信</v-tab>
+        <v-tab v-if="ifChat" :to="chatRouter">私信</v-tab>
 
         <!-- <v-tab v-if="headers.user_name" to="/task/finishedTask">完成的任务</v-tab> -->
         <!-- <v-tab v-if="headers.user_name" to="/task/myTask">我的任务</v-tab>
@@ -64,8 +64,12 @@
 export default {
   data() {
     return {
+      // 信件列表
+      letterList: [],
+      chatRouter: "",
+      ifChat: false,
       // 头像
-      avatar : "",
+      avatar: "",
       // 选择的tab
       selectedTab: null,
       drawer: false,
@@ -82,7 +86,8 @@ export default {
       dialog: false,
       headers: {
         Authorization: '',
-        user_name: ''
+        user_name: '',
+        user_id: 0,
       },
       nameRules: [
         (v) => !!v || '用户名不能为空',
@@ -117,18 +122,19 @@ export default {
     this.headers = {
       Authorization: `Bearer ${window.sessionStorage.getItem('token')}`,
       user_name: window.sessionStorage.getItem('user_name'),
-      user_id : parseInt(window.sessionStorage.getItem("user_id"))
+      user_id: parseInt(window.sessionStorage.getItem("user_id"))
 
     }
+    this.getLetterList()
     this.getProfileInfo()
   },
   methods: {
     // 获取头像
-    async  getProfileInfo() {
+    async getProfileInfo() {
       if (!this.headers.user_name) return
-       const { data: res } = await this.$http.get(`admin/profile/${this.headers.user_id}`)
-       if (res.state !== 200) return this.$message.error(res.message)
-       this.avatar = res.data.avatar
+      const { data: res } = await this.$http.get(`admin/profile/${this.headers.user_id}`)
+      if (res.state !== 200) return this.$message.error(res.message)
+      this.avatar = res.data.avatar
       //  console.log("res",res)
     },
     // 前往后台管理页面
@@ -138,7 +144,7 @@ export default {
     },
     // 获取分类
     cteatedFun() {
-      console.log("this.$router.path",this.$route.path)
+      console.log("this.$router.path", this.$route.path)
     },
 
     // 查找文章标题
@@ -201,7 +207,26 @@ export default {
       this.$message.success('注册成功')
       this.dialog = false
       this.$router.go(0)
-    }
+    },
+    // 获取信件列表
+    async getLetterList() {
+      if (!this.headers.user_name) return
+      const { data: res } = await this.$http.get(`letter/QueryLetterByUserId/${this.headers.user_id}`)
+      console.log("letterList res", res)
+      if (res.state !== 200) {
+        this.$message.error(res.message);
+        return;
+      }
+      this.letterList = res.data;
+      if (res.data.length ==  0) {
+        this.ifChat = false;
+      } else {
+        this.ifChat = true;
+
+        this.chatRouter = '/letter/chat/' + res.data[0].id;
+        console.log("letterList", this.letterList)
+      }
+    },
   }
 }
 </script>

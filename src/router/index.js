@@ -23,6 +23,7 @@ const AdminAddArticle = () => import('@/components/article/AddArticle')
 const letter = () => import('@/components/letter/Letter')
 const Chat = () => import('@/components/letter/Chat')
 
+const L7 = () => import('@/components/L7/L7')
 Vue.use(VueRouter)
 
 const routes = [
@@ -42,9 +43,10 @@ const routes = [
       { path: '/article/detail/:id', component: ArticleDetail, meta: { title: '文章详情' }, props: true },
       {
         path: 'letter', name: "Letter", component: letter, children: [
-          { path: 'chat/:userId', name: 'Chat', component: Chat, meta: { title: '私信' } }
+          { path: 'chat/:chatId', name: 'Chat', component: Chat, meta: { title: '私信' }, props: true }
         ], meta: { title: '私信' }, props: true
       },
+      { path: '/L7', name: "L7", component: L7, meta: { title: 'L7' } },
       // { path: '/letter', name: "Letter", component: letter, meta: { title: '私信' }, props: true },
     ],
     meta: { title: '首页' }
