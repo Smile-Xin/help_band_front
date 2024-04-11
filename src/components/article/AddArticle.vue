@@ -15,7 +15,7 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="文章类型" prop="cid">
+        <!-- <el-form-item label="文章类型" prop="cid">
           <el-select
             placeholder="选择文章类型"
             v-model="article.cid"
@@ -29,7 +29,7 @@
             >
             </el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item label="文章简介">
           <el-input
@@ -75,9 +75,9 @@ export default {
       categories: [],
       articleRules: {
         title: [{ required: true, message: "标题不可为空", trigger: "blur" }],
-        cid: [
-          { required: true, message: "请选择文章分类", trigger: "change" }
-        ],
+        // cid: [
+        //   { required: true, message: "请选择文章分类", trigger: "change" }
+        // ],
         content: [
           { required: true, message: "文章内容不可为空", trigger: "blur" }
         ],

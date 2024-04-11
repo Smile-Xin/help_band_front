@@ -21,13 +21,19 @@
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button @click="goToDetail(scope.row)" type="text" size="small">详细页面</el-button>
-            <el-button v-if="scope.row.status == 0" type="text" size="small" @click="goToEditTask(scope.row)">编辑</el-button>
-            <el-button v-if="scope.row.status == 0" @click="deleteTask(scope.row)" type="text" size="small">删除</el-button>
-            <el-button v-if="scope.row.status >1" @click="download(scope.row)" type="text" size="small">下载</el-button>
-            <el-button v-if="scope.row.status == 2 || scope.row.status == 6" @click="finish(scope.row)" type="text" size="small">完成</el-button>
-            <el-button v-if="scope.row.status == 2 || scope.row.status == 6" @click="rejectionBtn(scope.row)" type="text" size="small">退回</el-button>
-            <el-button v-if="scope.row.status == 3"  @click="taskCommentBtn(scope.row)" type="text" size="small">评论</el-button>
-            <el-button v-if="scope.row.status == 4"  @click="taskCommentBtn(scope.row)" type="text" size="small">修改评论</el-button>
+            <el-button v-if="scope.row.status == 0" type="text" size="small"
+              @click="goToEditTask(scope.row)">编辑</el-button>
+            <el-button v-if="scope.row.status == 0" @click="deleteTask(scope.row)" type="text"
+              size="small">删除</el-button>
+            <el-button v-if="scope.row.status > 1" @click="download(scope.row)" type="text" size="small">下载</el-button>
+            <el-button v-if="scope.row.status == 2 || scope.row.status == 6" @click="finish(scope.row)" type="text"
+              size="small">完成</el-button>
+            <el-button v-if="scope.row.status == 2 || scope.row.status == 6" @click="rejectionBtn(scope.row)"
+              type="text" size="small">退回</el-button>
+            <el-button v-if="scope.row.status == 3" @click="taskCommentBtn(scope.row)" type="text"
+              size="small">评论</el-button>
+            <el-button v-if="scope.row.status == 4" @click="taskCommentChangeBtn(scope.row)" type="text"
+              size="small">修改评论</el-button>
 
             <!-- 评论对话框 -->
             <el-dialog title="评论" :visible.sync="dialogVisible" width="40%" @close="commentFormLogClose">
@@ -51,8 +57,30 @@
               </span>
             </el-dialog>
 
+            <!-- 修改评论对话框 -->
+            <el-dialog title="评论" :visible.sync="dialogVisible2" width="40%" @close="commentFormLogClose">
+
+              <el-form ref="commentForm" :model="commentForm" label-width="80px">
+                <el-form-item label="">
+                  <!-- 评分 -->
+                  <p>评分</p><el-rate v-model="commentForm.score"></el-rate>
+                </el-form-item>
+
+                <!-- 评论内容 -->
+                <el-form-item label="">
+                  <p>评论内容</p>
+                  <el-input type="textarea" v-model="commentForm.content" style="width: 50%;"></el-input>
+                </el-form-item>
+              </el-form>
+
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible2 = false">取 消</el-button>
+                <el-button type="primary" @click="changeTaskComment()">确 定</el-button>
+              </span>
+            </el-dialog>
+
             <!-- 退回对话框 -->
-          <el-dialog title="退回任务" :visible.sync="rejectionDialogVisible" width="40%" @close="commentFormLogClose">
+            <el-dialog title="退回任务" :visible.sync="rejectionDialogVisible" width="40%" @close="commentFormLogClose">
 
               <el-form ref="commentForm" :model="commentForm" label-width="80px">
 
@@ -64,7 +92,7 @@
               </el-form>
 
               <span slot="footer" class="dialog-footer">
-                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button @click="rejectionDialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="rejectionTask()">确 定</el-button>
               </span>
             </el-dialog>
@@ -88,7 +116,7 @@ export default {
   data() {
     return {
       // 已登录的用户信息
-      headers:{
+      headers: {
         user_name: '',
         user_id: 0
       },
@@ -104,33 +132,35 @@ export default {
       // 获取的任务总数
       total: 0,
       // 将要添加评论的任务信息
-      task:{},
+      task: {},
       // 评论对话框状态
       dialogVisible: false,
+      dialogVisible2: false,
       // 退回對話框狀態
       rejectionDialogVisible: false,
       score: null,
       // 评论表单
       commentForm: {
+        id: 0,
         // 评论的任务id
-        task_id : 0,
+        task_id: 0,
         // 评价者id
-        appraiser_id : 0,
+        appraiser_id: 0,
         // 评价者name
         appraiser_name: 0,
         // 被评价者id
         receiver_id: 0,
         // 被评价者name
-        receiver_name : 0,
+        receiver_name: 0,
         // 评论内容
         content: '',
         // 评论分数
         score: null,
         // 状态码 0：未评论 1：这条评论是买家评论的 2：这条评论是卖家评论的 -1：这条评论是退回的信息
-        status : 0,
+        status: 0,
       },
       // 退回表单
-      
+
     };
   },
   created() {
@@ -138,44 +168,79 @@ export default {
     this.getTaskList();
   },
   methods: {
+
     // 点击退回按钮
-    rejectionBtn(item){
+    rejectionBtn(item) {
       this.task = item;
       this.rejectionDialogVisible = true;
     },
     // 退回task
-    rejectionTask(){
+    rejectionTask() {
       this.commentForm.status = -1;
       this.addTaskCommentPort();
     },
     // 改变评论状态
-    async changeTaskStatus(){
+    async changeTaskStatus() {
       this.dialogVisible = false;
       this.rejectionDialogVisible = false;
       const { data: res } = await this.$http.post(
-              "task/EditTask",
-              this.task
-            );
-            if (res.state != 200) {
-              this.$message.error(res.message);
-            } else {
-              this.$message({
-                type: "success",
-                message: "操作成功!",
-              });
-            }
-            // this.$router.go(0);
+        "task/EditTask",
+        this.task
+      );
+      if (res.state != 200) {
+        this.$message.error(res.message);
+      } else {
+        this.$message({
+          type: "success",
+          message: "操作成功!",
+        });
+      }
+      // this.$router.go(0);
     },
     // 点击添加评论
-    taskCommentBtn(item){
+    taskCommentBtn(item) {
       console.log(item);
       this.task = item;
       this.dialogVisible = true;
     },
+    // 点击修改评论按钮
+    taskCommentChangeBtn(item) {
+      console.log(item);
+      this.task = item;
+      this.dialogVisible2 = true;
+    },
     // 添加评论表单中点击确定按钮
-    addTaskComment(){
+    addTaskComment() {
       this.commentForm.status = 2;
       this.addTaskCommentPort();
+    },
+    // 修改评论表单中点击确定按钮
+    changeTaskComment() {
+      this.commentForm.status = 2;
+      this.cahngeTaskCommentPort();
+    },
+    async cahngeTaskCommentPort() {
+      const { data: res } = await this.$http.get(`taskComment/QueryCommentByTaskID/${this.task.ID}`)
+      if (res.state != 200) {
+        console.log("query comment error", res)
+        return this.$message.error(res.message);
+      } else {
+        this.commentForm.id = res.data.ID;
+        console.log("query comment", res)
+        console.log("commentForm", this.commentForm)
+        const { data: res2 } = await this.$http.post(`taskComment/EditTaskComment`, this.commentForm)
+        if (res2.state != 200) {
+          console.log("edit comment error", res2)
+          return this.$message.error(res2.message);
+        } else {
+          this.$message({
+            type: "success",
+            message: "修改成功!",
+          });
+
+        }
+      }
+      this.dialogVisible2 = false;
     },
     // 向服务器添加评论
     async addTaskCommentPort() {
@@ -186,15 +251,15 @@ export default {
       this.commentForm.appraiser_name = this.headers.user_name;
       this.commentForm.receiver_id = item.recipient_id;
       this.commentForm.receiver_name = item.recipient_name;
-      console.log(this,this.commentForm)
+      console.log(this, this.commentForm)
       const { data: res } = await this.$http.post(`taskComment/AddTaskComment`, this.commentForm);
       if (res.state != 200) {
         return this.$message.error(res.message);
       } else {
-        if (this.commentForm.status == -1){
-            this.task.status = 5;
-            this.changeTaskStatus();
-        }else{
+        if (this.commentForm.status == -1) {
+          this.task.status = 5;
+          this.changeTaskStatus();
+        } else {
           this.task.status = 4;
           this.changeTaskStatus();
         }
@@ -212,24 +277,24 @@ export default {
     },
     // 前往编辑任务页面
     goToEditTask(item) {
-      if (item.status != 0){
+      if (item.status != 0) {
         this.$message.error("任务已被接受，不可编辑！");
         return;
       }
       this.$router.push(`/task/edit/${item.ID}`);
     },
     // 前往任务详情页面
-    goToDetail(item){
+    goToDetail(item) {
       // console.log(item)
       this.$router.push(`/task/detail/${item.ID}`);
     },
     // 下载文件
-    download(item){
+    download(item) {
       console.log(item.article)
       window.open(item.article)
     },
     // 完成任务
-    finish(item){
+    finish(item) {
       console.log(item)
       this.$confirm.confirm("是否完成此任务", "提示", {
         confirmButtonText: "确定",
@@ -302,7 +367,7 @@ export default {
     // 点击删除任务按钮函数
     deleteTask(task) {
       console.log(task)
-      if (task.status != 0){
+      if (task.status != 0) {
         this.$message.error("任务已被接受，不可删除！");
         return;
       }

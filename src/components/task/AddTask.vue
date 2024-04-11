@@ -98,10 +98,11 @@ export default {
       if (!id) return;
       const { data: res } = await this.$http.get(`task/QueryTaskByID/${id}`);
       if (res.state != 200) {
-        return this.$message.error(res.data.$message);
+        console.log("res.data.$message", res);
+        return this.$message.error(res.data.message);
       }
       this.task = res.data;
-      // console.log("this.task", this.task);
+      console.log("this.task", this.task);
     },
     // 添加或者修改任务
     addtask(formName) {

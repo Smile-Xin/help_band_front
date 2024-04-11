@@ -109,8 +109,8 @@ export default {
     async getTaskInfo() {
       const { data: res } = await this.$http.get(`task/QueryTaskByID/${this.taskId}`)
       this.taskInfo = res.data;
-      console.log(this.taskInfo)
-      window.sessionStorage.setItem('title', this.taskInfo.title)
+      console.log("this.taskInfo",this.taskInfo)
+      window.sessionStorage.setItem('title',res)
     },
     // 获取评论
     async getCommentList() {
