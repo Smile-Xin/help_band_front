@@ -335,7 +335,7 @@ export default {
         return "已完成";
       }
       if (row.status == 4) {
-        return "已完成";
+        return "已评价";
       }
       if (row.status == -1) {
         return "已取消";

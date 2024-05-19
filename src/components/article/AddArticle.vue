@@ -67,7 +67,7 @@ export default {
         Category: {},
         id: 0,
         title: "",
-        cid: "",
+        // cid: "",
         desc: "",
         content: "",
         uid:  parseInt(window.sessionStorage.getItem("user_id")),
@@ -155,7 +155,7 @@ export default {
     },
   },
   created() {
-    this.getCategoryList();
+    // this.getCategoryList();
     if (this.id) {
       this.getArticle(this.id);
     }

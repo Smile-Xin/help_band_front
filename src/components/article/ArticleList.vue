@@ -25,7 +25,7 @@
         <el-table-column prop="ID" label="ID"></el-table-column>
         <el-table-column prop="title" label="文章标题"></el-table-column>
         <el-table-column prop="desc" label="文章描述"></el-table-column>
-        <el-table-column prop="Category.name" label="文章分类"></el-table-column>
+        <!-- <el-table-column prop="Category.name" label="文章分类"></el-table-column> -->
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button type="text" size="small" @click="$router.push(`addArticle/${scope.row.ID}`)"
